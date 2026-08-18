@@ -22,8 +22,9 @@ ones — nothing below requires them to be on `127.0.0.1`).
 
 ### OpenSearch (the `knowledge` store)
 
-Install and set up the [OpenSearch snap](https://github.com/canonical/opensearch-snap). During
-[certificate creation](https://github.com/canonical/opensearch-snap?tab=readme-ov-file#creating-certificates),
+The [Official OpenSearch product]([https://tika.apache.org/](https://opensearch.org/) which we will install via [OpenSearch snap](https://github.com/canonical/opensearch-snap) for an easier set up . 
+
+During [certificate creation](https://github.com/canonical/opensearch-snap?tab=readme-ov-file#creating-certificates),
 make sure the `ingest` and `ml` roles are set on the node:
 
 ```bash
@@ -76,8 +77,8 @@ Pick one:
     }'
   ```
 
-### Tika (the `tika` service)
-
+### Tika (the `input metadata/text extraction` service)
+[Official Apache Tika product](https://tika.apache.org/), for input metadata and text extraction
 Bundled with the snap — nothing to install separately. It's started in
 [Configure the backends](#configure-the-backends) below.
 
