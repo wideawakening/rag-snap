@@ -20,7 +20,7 @@ browser UI.
 `rag-cli` is a thin orchestrator over three services. Set these up first (or point at existing
 ones — nothing below requires them to be on `127.0.0.1`).
 
-### OpenSearch (the `knowledge` store)
+### 1. OpenSearch (the `knowledge` store)
 
 The [Official OpenSearch product]([https://tika.apache.org/](https://opensearch.org/) which we will install via [OpenSearch snap](https://github.com/canonical/opensearch-snap) for an easier set up . 
 
@@ -56,7 +56,7 @@ You can also point `rag-cli` at an existing/remote OpenSearch cluster you alread
 see [Configure the backends](#configure-the-backends) below; just substitute its host, port, and
 credentials.
 
-### An inference backend (the `chat` backend)
+### 2. An inference backend (the `chat` backend)
 
 Pick one:
 
@@ -77,7 +77,7 @@ Pick one:
     }'
   ```
 
-### Tika (the `input metadata/text extraction` service)
+### 3. Tika (the `input metadata/text extraction` service)
 [Official Apache Tika product](https://tika.apache.org/), for input metadata and text extraction
 Bundled with the snap — nothing to install separately. It's started in
 [Configure the backends](#configure-the-backends) below.
