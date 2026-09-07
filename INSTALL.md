@@ -22,7 +22,7 @@ ones — nothing below requires them to be on `127.0.0.1`).
 
 ### 1. OpenSearch (the `knowledge` store)
 
-The [Official OpenSearch product]([https://tika.apache.org/](https://opensearch.org/) which we will install via [OpenSearch snap](https://github.com/canonical/opensearch-snap) for an easier set up . 
+The [Official OpenSearch product](https://opensearch.org/) which we will install via [OpenSearch snap](https://github.com/canonical/opensearch-snap) for an easier set up . 
 
 During [certificate creation](https://github.com/canonical/opensearch-snap?tab=readme-ov-file#creating-certificates),
 make sure the `ingest` and `ml` roles are set on the node:
