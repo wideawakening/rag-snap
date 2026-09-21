@@ -5,11 +5,8 @@ configuring it against your backends, verifying the CLI works, and (optionally) 
 browser UI.
 
 - [Prerequisites](#prerequisites)
-- [Install the snap](#install-the-snap)
-- [Configure the backends](#configure-the-backends)
-- [Secrets](#secrets)
-- [Initialize pipelines and models](#initialize-pipelines-and-models)
-- [Verify: create a knowledge base and chat](#verify-create-a-knowledge-base-and-chat)
+- [Installation](#install-the-snap)
+- [Knowledge Initialization](#knowledge-initialization)
 - [Enable the browser UI](#enable-the-browser-ui)
 - [Where to go next](#where-to-go-next)
 
@@ -85,6 +82,8 @@ Bundled with the snap — nothing to install separately. It's started in
 
 ## Install the snap
 
+
+### 1. Snap Install
 From the Snap store:
 
 ```bash
@@ -99,13 +98,14 @@ sudo snap install --dangerous ./rag-cli_*.snap
 ```
 
 
-## Configure the backends
+### 2. Configure the backends
 
 Set these with `sudo rag-cli.rag set --package <key>=<value>`. Substitute your real hosts —
-`127.0.0.1` below is just the common case; a remote/external OpenSearch cluster works the same
-way, just use its real host/port.
+`127.0.0.1` below is just the common case
 
-**Chat via Bedrock:**
+Tested options to pick from are following:
+
+#### - op1) via Bedrock
 
 ```bash
 sudo rag-cli.rag set --package chat.http.host="bedrock-runtime.us-east-2.amazonaws.com"
@@ -115,7 +115,7 @@ sudo rag-cli.rag set --package chat.http.path="openai/v1"
 sudo rag-cli.rag set --package chat.model="mistral.mistral-large-3-675b-instruct"
 ```
 
-**Chat via a local Inference snap (instead of Bedrock):**
+### - op2) via local inference snap
 
 ```bash
 sudo rag-cli.rag set --package chat.http.host="127.0.0.1"
@@ -123,7 +123,10 @@ sudo rag-cli.rag set --package chat.http.port="8324"
 sudo rag-cli.rag set --package chat.http.path="v1"
 ```
 
-**Knowledge (OpenSearch) — use your cluster's real host:**
+### 3. Knowledge (OpenSearch)
+
+use your cluster's real host. a remote/external OpenSearch cluster works the same
+way, just use its real host/port.
 
 ```bash
 sudo rag-cli.rag set --package knowledge.http.host="127.0.0.1"   # or a remote host, e.g. a cluster IP
@@ -131,7 +134,7 @@ sudo rag-cli.rag set --package knowledge.http.port="9200"
 sudo rag-cli.rag set --package knowledge.http.tls="true"
 ```
 
-**Tika (bundled, always local):**
+### 4. Tika (bundled, always local)
 
 ```bash
 sudo rag-cli.rag set --package tika.http.host="127.0.0.1"
@@ -140,10 +143,27 @@ sudo rag-cli.rag set --package tika.http.path="tika"
 sudo snap start rag-cli.tika-server
 ```
 
-Check everything with `rag-cli.rag status`.
+### 5. Validate Status
+
+Check service are active and endpoints configured.
+
+```bash
+$ sudo ag-cli.rag status
+models:
+    embedding: huggingface/sentence-transformers/msmarco-distilbert-base-tas-b (j8_tr6ABrqI30v_eRcuP)
+    llm: gemma-3-4b-it-ov-int4-fq
+    reranker: huggingface/cross-encoders/ms-marco-MiniLM-L-12-v2 (ks_tr6ABrqI30v_ec8sr)
+services:
+    ragd: active
+    tika-server: active
+endpoints:
+    openai: http://127.0.0.1:8328/v3
+    opensearch: https://127.0.0.1:9200
+    tika: http://127.0.0.1:9998/tika
+```
 
 
-## Secrets
+### 6. Secrets
 
 Secrets are never stored in config — they're environment variables.
 
@@ -158,6 +178,7 @@ export CHAT_API_KEY="bedrock-api-key-****"
 
 The CLI inherits these directly from your shell, so this is enough for every `rag-cli.rag ...`
 command.
+
 
 **For the browser UI / REST API**, the daemon (`ragd`) runs as a separate systemd service with
 its own environment — your shell's `export` is invisible to it. Give it all three secrets with a
@@ -187,7 +208,9 @@ sudo sh -c "tr '\0' '\n' < /proc/\$(pgrep -x ragd)/environ" | grep -cE '^(CHAT_A
 > above take effect the same way, including a non-default OpenSearch username/password.
 
 
-## Initialize pipelines and models
+## Knowledge Initialization
+
+### 1. Model setup
 
 ```bash
 rag-cli.rag knowledge init
@@ -205,7 +228,7 @@ sudo rag-cli.rag set --package knowledge.model.rerank=<rerank-model-id>
 Check what the engine will use with `rag-cli.rag get knowledge.model`.
 
 
-## Verify: create a knowledge base and chat
+### 2. Verify: create a knowledge base and chat
 
 ```bash
 rag-cli.rag k create default
