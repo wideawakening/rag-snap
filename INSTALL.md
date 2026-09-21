@@ -13,7 +13,7 @@ browser UI.
 - [Enable the browser UI](#enable-the-browser-ui)
 - [Where to go next](#where-to-go-next)
 
----
+
 
 ## Prerequisites
 
@@ -82,7 +82,6 @@ Pick one:
 Bundled with the snap — nothing to install separately. It's started in
 [Configure the backends](#configure-the-backends) below.
 
----
 
 ## Install the snap
 
@@ -99,7 +98,6 @@ snapcraft -v
 sudo snap install --dangerous ./rag-cli_*.snap
 ```
 
----
 
 ## Configure the backends
 
@@ -144,7 +142,6 @@ sudo snap start rag-cli.tika-server
 
 Check everything with `rag-cli.rag status`.
 
----
 
 ## Secrets
 
@@ -189,7 +186,6 @@ sudo sh -c "tr '\0' '\n' < /proc/\$(pgrep -x ragd)/environ" | grep -cE '^(CHAT_A
 > silently override anything set via a drop-in. Because none are hardcoded, all three secrets
 > above take effect the same way, including a non-default OpenSearch username/password.
 
----
 
 ## Initialize pipelines and models
 
@@ -208,7 +204,6 @@ sudo rag-cli.rag set --package knowledge.model.rerank=<rerank-model-id>
 
 Check what the engine will use with `rag-cli.rag get knowledge.model`.
 
----
 
 ## Verify: create a knowledge base and chat
 
@@ -222,7 +217,6 @@ In the chat REPL, `/use-knowledge` selects which bases ground your answers. See
 [docs/usage.md](docs/usage.md) for the full CLI reference (ingest formats, batch jobs, export/import,
 Google Drive import, `answer batch`, etc.)
 
----
 
 ## Enable the browser UI
 
@@ -249,7 +243,6 @@ rag-cli.rag ui --no-browser
 You must be `root` or a member of the daemon's access group (default `rag`) to reach it. See
 [docs/local-ui.md](docs/local-ui.md) for navigating the UI, the trust model, and troubleshooting.
 
----
 
 ## Where to go next
 
