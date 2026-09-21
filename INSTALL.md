@@ -11,6 +11,7 @@ browser UI.
 - [Where to go next](#where-to-go-next)
 
 
+---
 
 ## Prerequisites
 
@@ -79,6 +80,8 @@ Pick one:
 Bundled with the snap — nothing to install separately. It's started in
 [Configure the backends](#configure-the-backends) below.
 
+
+---
 
 ## Install the snap
 
@@ -209,6 +212,8 @@ sudo sh -c "tr '\0' '\n' < /proc/\$(pgrep -x ragd)/environ" | grep -cE '^(CHAT_A
 > silently override anything set via a drop-in. Because none are hardcoded, all three secrets
 > above take effect the same way, including a non-default OpenSearch username/password.
 
+---
+
 
 ## Knowledge Initialization
 
@@ -248,6 +253,8 @@ In the chat REPL, `/use-knowledge` selects which bases ground your answers. See
 Google Drive import, `answer batch`, etc.)
 
 
+---
+
 ## Enable the browser UI
 
 The loopback listener is off by default. Enable it and start the daemon:
@@ -273,6 +280,8 @@ rag-cli.rag ui --no-browser
 You must be `root` or a member of the daemon's access group (default `rag`) to reach it. See
 [docs/local-ui.md](docs/local-ui.md) for navigating the UI, the trust model, and troubleshooting.
 
+
+---
 
 ## Where to go next
 
