@@ -148,7 +148,7 @@ sudo snap start rag-cli.tika-server
 Check service are active and endpoints configured.
 
 ```bash
-$ sudo ag-cli.rag status
+$ sudo rag-cli.rag status
 models:
     embedding: huggingface/sentence-transformers/msmarco-distilbert-base-tas-b (j8_tr6ABrqI30v_eRcuP)
     llm: gemma-3-4b-it-ov-int4-fq
@@ -162,6 +162,8 @@ endpoints:
     tika: http://127.0.0.1:9998/tika
 ```
 
+You can get a dump of all options with `rag-cli.rag get`
+
 
 ### 6. Secrets
 
@@ -172,8 +174,8 @@ shell before running commands:
 
 ```bash
 export OPENSEARCH_USERNAME="admin"
-export OPENSEARCH_PASSWORD="admin"      # or your cluster's real password
-export CHAT_API_KEY="bedrock-api-key-****"
+export OPENSEARCH_PASSWORD="admin"              # or your cluster's real password
+export CHAT_API_KEY="bedrock-api-key-****"      # only for bedrock
 ```
 
 The CLI inherits these directly from your shell, so this is enough for every `rag-cli.rag ...`
@@ -212,13 +214,14 @@ sudo sh -c "tr '\0' '\n' < /proc/\$(pgrep -x ragd)/environ" | grep -cE '^(CHAT_A
 
 ### 1. Model setup
 
+This prints the embedding and rerank model IDs it resolved. 
+
 ```bash
 rag-cli.rag knowledge init
 ```
 
-This prints the embedding and rerank model IDs it resolved. With the `ragd` daemon running, the
-daemon writes them to the package configuration itself and the command says so. Otherwise set them
-yourself, using the IDs printed above:
+With the `ragd` daemon running, the daemon writes them to the package configuration itself and the command says so. 
+Otherwise set them yourself, using the IDs printed above:
 
 ```bash
 sudo rag-cli.rag set --package knowledge.model.embedding=<embedding-model-id>
@@ -228,11 +231,15 @@ sudo rag-cli.rag set --package knowledge.model.rerank=<rerank-model-id>
 Check what the engine will use with `rag-cli.rag get knowledge.model`.
 
 
-### 2. Verify: create a knowledge base and chat
+### 2. Create a knowledge base
 
 ```bash
-rag-cli.rag k create default
-rag-cli.rag k ingest default <source-id> --file <path-to-local-file>
+rag-cli.rag k create default                                            # just once
+rag-cli.rag k ingest default <source-id> --file <path-to-local-file>    # as many as needed
+```
+
+Now you can chat!
+```bash
 rag-cli.rag chat
 ```
 
