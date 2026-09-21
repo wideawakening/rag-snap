@@ -115,7 +115,7 @@ sudo rag-cli.rag set --package chat.http.path="openai/v1"
 sudo rag-cli.rag set --package chat.model="mistral.mistral-large-3-675b-instruct"
 ```
 
-### - op2) via local inference snap
+#### - op2) via local inference snap
 
 ```bash
 sudo rag-cli.rag set --package chat.http.host="127.0.0.1"
