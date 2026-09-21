@@ -206,53 +206,6 @@ The UI is then reachable at `http://127.0.0.1:43210/ui/` on that resolved port. 
 
 ---
 
-## Configuring the chat backend and API key
-
-The UI talks to the daemon, and the **daemon** — not your shell — makes the call to the
-inference backend. Backend secrets are passed to `ragd` through environment variables
-(`OPENSEARCH_USERNAME`, `OPENSEARCH_PASSWORD`, `CHAT_API_KEY`), never through config.
-
-This matters for the chat API key. When you run `rag-cli.rag chat` interactively, the CLI
-inherits `CHAT_API_KEY` from your shell, so a plain `export CHAT_API_KEY=…` is enough. But
-the UI is served by the **`ragd` systemd service**, which has its own environment and does
-**not** see your shell exports. Without the key, the daemon calls the backend with no
-`Authorization` header and the backend replies `401 Unauthorized` (e.g. Bedrock:
-`"Authorization header is missing"`).
-
-Give the daemon its secrets — the chat key, and your real OpenSearch credentials if your
-cluster doesn't use the `admin`/`admin` default — with a **root-only systemd drop-in** (the
-snap's auto-generated unit is regenerated on every restart and must not be edited directly).
-The same recipe is in [the REST API guide](rest-api.md):
-
-```bash
-sudo mkdir -p /etc/systemd/system/snap.rag-cli.ragd.service.d
-printf '[Service]\nEnvironment=CHAT_API_KEY=%s\nEnvironment=OPENSEARCH_USERNAME=%s\nEnvironment=OPENSEARCH_PASSWORD=%s\n' \
-  "$YOUR_CHAT_KEY" "$YOUR_OPENSEARCH_USER" "$YOUR_OPENSEARCH_PASSWORD" | \
-  sudo tee /etc/systemd/system/snap.rag-cli.ragd.service.d/10-secrets.conf >/dev/null
-sudo chmod 600 /etc/systemd/system/snap.rag-cli.ragd.service.d/10-secrets.conf
-sudo systemctl daemon-reload
-sudo snap restart rag-cli.ragd
-```
-
-The drop-in is `root:root 0600`, so the secrets are never world-readable and never pass
-through the `snapctl` config store or the `GET /1.0` config summary.
-
-Confirm the running daemon actually has them (checks the live process, not just the unit):
-
-```bash
-sudo tr '\0' '\n' < /proc/$(pgrep -x ragd)/environ | grep -E 'CHAT_API_KEY|OPENSEARCH_USERNAME|OPENSEARCH_PASSWORD'
-```
-
-The drop-in directory survives `snap restart` and `snap install --dangerous` of the same
-build. A full `snap remove` clears it, so re-apply the drop-in after a clean reinstall.
-
-> **Note:** the snap deliberately declares no `environment:` values for `CHAT_API_KEY`,
-> `OPENSEARCH_USERNAME`, or `OPENSEARCH_PASSWORD` in its own metadata. Hardcoding any of them
-> (even as an empty string) would make snapd apply that value over whatever the systemd unit
-> provides, so the drop-in could never take effect — this is what lets a non-default OpenSearch
-> username/password work the same way as the chat key.
-
----
 
 ## Launching with `rag ui`
 
