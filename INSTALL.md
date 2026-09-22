@@ -14,7 +14,7 @@ browser UI.
 ---
 ## Node Prerequisites
 
-### op1) local lxd
+### -op1) local lxd
 
 adjust specs based on your host resources (check cpu `nproc` and memroy `free -h` to adjust accordingly)
 
@@ -70,22 +70,58 @@ credentials.
 
 Pick one:
 
-- **(Recommended) [AWS Bedrock](docs/bedrock_guide.md)** — a third-party OpenAI-compatible API.
-  > **Warning:** your prompts and retrieved context are sent to an external service. Do not
-  > ingest or ask about confidential information in this configuration.
-- **(Alternative) An [Inference snap](https://github.com/canonical/inference-snaps)** running
-  locally. Pick the engine appropriate for your hardware (`sudo <inference-snap-name>
-  show-engine`), and confirm it responds:
-  ```bash
-  curl http://localhost:8324/v1/chat/completions \
-    -H 'Content-Type: application/json'          \
-    -d '{
-      "messages": [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Hello!"}
-      ]
-    }'
-  ```
+#### -op1) (Recommended) [AWS Bedrock](docs/bedrock_guide.md)
+
+a third-party OpenAI-compatible API.
+
+> **Warning:** your prompts and retrieved context are sent to an external service. Do not
+> ingest or ask about confidential information in this configuration.
+
+#### -op2) (Alternative) Canonical Inference Snap
+An [Inference snap](https://github.com/canonical/inference-snaps)** running locally. 
+
+Pick the engine appropriate for your hardware 
+
+``` bash
+# sudo gemma3 use-engine --auto
+Evaluating engines for optimal hardware compatibility:
+✘ amd-gpu: not compatible
+✔ cpu: compatible, score=10
+✔ intel-cpu: compatible, score=16
+✘ intel-gpu: not compatible
+✘ nvidia-gpu: not compatible
+Selected engine: intel-cpu
+
+# gemma3 status
+engine: intel-cpu
+services:
+    server: active
+    server-webui: active
+entrypoints:
+    kserve:
+        url: http://127.0.0.1:8328/v2
+    openai:
+        url: http://127.0.0.1:8328/v3
+    tensorflow-serving:
+        url: http://127.0.0.1:8328/v1
+    webui:
+        url: http://127.0.0.1:8329
+model:
+    name: gemma3-4b-ov
+```
+
+and confirm it responds through the `openai` entrypoint
+
+```bash
+curl http://localhost:8328/v3/chat/completions \
+-H 'Content-Type: application/json'          \
+-d '{
+  "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Hello!"}
+  ]
+}'
+```
 
 ### 3. Tika (the `input metadata/text extraction` service)
 [Official Apache Tika product](https://tika.apache.org/), for input metadata and text extraction
@@ -120,7 +156,7 @@ Set these with `sudo rag-cli.rag set --package <key>=<value>`. Substitute your r
 
 Tested options to pick from are following:
 
-#### - op1) via Bedrock
+#### -op1) via Bedrock
 
 ```bash
 sudo rag-cli.rag set --package chat.http.host="bedrock-runtime.us-east-2.amazonaws.com"
@@ -130,7 +166,7 @@ sudo rag-cli.rag set --package chat.http.path="openai/v1"
 sudo rag-cli.rag set --package chat.model="mistral.mistral-large-3-675b-instruct"
 ```
 
-#### - op2) via local inference snap
+#### -op2) via local inference snap
 
 ```bash
 sudo rag-cli.rag set --package chat.http.host="127.0.0.1"
