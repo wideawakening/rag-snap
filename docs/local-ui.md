@@ -10,7 +10,6 @@ Remote/HTTPS exposure is intentionally **not** part of this surface: the listene
 
 - [Quick start: from install to a first answer](#quick-start-from-install-to-a-first-answer)
 - [Navigating the UI](#navigating-the-ui)
-- [Enabling the listener](#enabling-the-listener)
 - [Launching with `rag ui`](#launching-with-rag-ui)
 - [Trust model](#trust-model)
 - [Troubleshooting](#troubleshooting)
@@ -172,7 +171,23 @@ writes. (Per-question source provenance is not shown yet — the batch API does 
 
 ---
 
-## Enabling the listener
+## Launching with `rag ui`
+
+The simplest way in is the `rag ui` command. It contacts the daemon over the trusted unix
+socket, discovers the loopback URL and token, and opens your browser with the token applied:
+
+```bash
+rag-cli.rag ui
+
+# Print the URL instead of opening a browser (e.g. on a headless host)
+rag-cli.rag ui --no-browser
+```
+
+When the listener is disabled, `rag ui` explains how to enable it (via
+`api.loopback.enabled`) rather than failing silently. You must be a member of the API access
+group (default `rag`) to reach the daemon over the unix socket and launch the UI.
+
+### Enabling the listener
 
 The loopback listener is opt-in and **off by default** (the unix socket remains the only
 default surface). Enable it and restart the daemon:
@@ -211,24 +226,29 @@ sudo snap logs rag-cli.ragd | grep 'serving loopback API'
 The UI is then reachable at `http://127.0.0.1:43210/ui/` on that resolved port. Prefer
 `rag-cli.rag ui`, which discovers the port and token for you.
 
----
 
+### Exposing Guest to Host
 
-## Launching with `rag ui`
-
-The simplest way in is the `rag ui` command. It contacts the daemon over the trusted unix
-socket, discovers the loopback URL and token, and opens your browser with the token applied:
-
-```bash
-rag-cli.rag ui
-
-# Print the URL instead of opening a browser (e.g. on a headless host)
-rag-cli.rag ui --no-browser
-```
-
-When the listener is disabled, `rag ui` explains how to enable it (via
-`api.loopback.enabled`) rather than failing silently. You must be a member of the API access
-group (default `rag`) to reach the daemon over the unix socket and launch the UI.
+In case you're using an LXD VM to run rag-snap, some hints
+- Use a static port on `api.loopback.address`, like `127.0.0.1:35555`
+  ```bash
+  sudo rag-cli.rag set   api.loopback.address=127.0.0.1:35555
+  sudo snap restart rag-cli.ragd  
+  ```
+- Use socat to redirect lxd vm to loopback
+  ```bash
+  (on host)
+  lxc config show fe-rag | grep ipv4.address
+      ipv4.address: 10.180.233.90
+  
+  (on guest)
+  # sudo socat TCP-LISTEN:35555,bind=10.180.233.90,fork,reuseaddr TCP:127.0.0.1:35555
+  
+  # ss -ntlp | grep 3555
+  LISTEN 0      4096                127.0.0.1:35555      0.0.0.0:*    users:(("ragd",pid=4662,fd=7))           
+  LISTEN 0      5               10.180.233.90:35555      0.0.0.0:*    users:(("socat",pid=5227,fd=5))     
+  
+  ```
 
 ---
 
