@@ -110,12 +110,13 @@ model:
     name: gemma3-4b-ov
 ```
 
-and confirm it responds through the `openai` entrypoint
+and confirm it responds through the `openai` entrypoint, using the `model` name
 
 ```bash
 curl http://localhost:8328/v3/chat/completions \
 -H 'Content-Type: application/json'          \
 -d '{
+  "model": "gemma3-4b-ov" 
   "messages": [
     {"role": "system", "content": "You are a helpful assistant."},
     {"role": "user", "content": "Hello!"}
