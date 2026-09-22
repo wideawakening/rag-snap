@@ -11,7 +11,6 @@ Remote/HTTPS exposure is intentionally **not** part of this surface: the listene
 - [Quick start: from install to a first answer](#quick-start-from-install-to-a-first-answer)
 - [Navigating the UI](#navigating-the-ui)
 - [Enabling the listener](#enabling-the-listener)
-- [Configuring the chat backend and API key](#configuring-the-chat-backend-and-api-key)
 - [Launching with `rag ui`](#launching-with-rag-ui)
 - [Trust model](#trust-model)
 - [Troubleshooting](#troubleshooting)
@@ -192,6 +191,14 @@ Two config keys control the listener:
 | ---------------------- | -------------- | ----------------------------------------------------------------------- |
 | `api.loopback.enabled` | `false`        | Whether `ragd` opens the loopback listener and serves the UI.           |
 | `api.loopback.address` | `127.0.0.1:0`  | Loopback bind address. `:0` picks an OS-assigned port. **Must be loopback** — a non-loopback address is refused at startup. |
+
+
+```bash
+sudo rag-cli.rag get api.loopback
+api.loopback.address: 127.0.0.0:0
+api.loopback.enabled: true
+
+```
 
 The resolved URL (with the OS-assigned port) is written to the daemon log and reported by
 `GET /1.0` under `config.loopback`:
