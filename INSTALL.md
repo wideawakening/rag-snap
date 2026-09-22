@@ -12,6 +12,18 @@ browser UI.
 
 
 ---
+## Node Prerequisites
+
+### op1) local lxd
+
+adjust specs based on your host resources (check cpu `nproc` and memroy `free -h` to adjust accordingly)
+
+```
+sudo snap install lxd --channel 6/stable
+sudo lxd init
+sudo lxc launch ubuntu:24.04 rag-snap --vm -c limits.cpu=6 -c limits.memory=40GiB -d root,size=32GiB
+lxc shell rag-snap
+```
 
 ## Prerequisites
 
