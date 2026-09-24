@@ -261,6 +261,17 @@ sudo sh -c "tr '\0' '\n' < /proc/\$(pgrep -x ragd)/environ" | grep -cE '^(CHAT_A
 > silently override anything set via a drop-in. Because none are hardcoded, all three secrets
 > above take effect the same way, including a non-default OpenSearch username/password.
 
+### 7. Survive  restarts
+
+Some service daemons (opensearch, rag-cli tika-server and ragd) are declared `install-mode: disabled`, so on every reboot it stops the service, permantently, until someone enables them.
+
+```
+sudo snap start --enable opensearch
+sudo snap start --enable rag-cli.tika-server
+sudo snap start --enable rag-cli.ragd           # if you use web UI / REST API
+```
+Running `snap enable $service` will not work due to the declared install mode.
+
 ---
 
 
