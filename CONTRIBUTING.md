@@ -31,7 +31,7 @@ lxc config device add rag-snap rag-snap-src disk \
 
 ### Prerequisites
 
-- [Go](https://go.dev/doc/install](https://snapcraft.io/go) 1.24+
+- [Go](https://snapcraft.io/go) 1.24+
 - `snapcraft` and `snapd` (for building/installing the snap)
 - `golangci-lint` (for linting; config is in `.golangci.yml`)
 - For running end to end: an OpenSearch snap, an inference server (a local
