@@ -1,12 +1,30 @@
 # Contributing to rag-cli
 
-Thanks for your interest in contributing! `rag-cli` is a CLI-based RAG tool
-packaged as a snap. This document covers how to set up a development
+Thanks for your interest in contributing!
+`rag-cli` is a CLI-based RAG tool packaged as a snap.
+
+This document covers how to set up a development
 environment, the change workflow we follow (OpenSpec), and our stance on
 AI-assisted contributions.
 
 By contributing, you agree that your contributions are licensed under the
 project's [GPL-3.0](LICENSE) license.
+
+
+## Development environment
+
+Feel free to setup the environment as you see it fit.
+Here a proposal.
+
+Launch an LXC container with the requirements and local lxd vm following [installation guidelines](INSTALL.md#-op1-local-lxd)
+
+On host, clone the repo and mount it as an lxc device into the testing environment
+
+```
+lxc config device add rag-snap rag-snap-src disk \
+  source="$HOME/src/rag-snap" \
+  path=/root/rag-snap-src
+```
 
 ## AI-assisted contributions are welcome
 
