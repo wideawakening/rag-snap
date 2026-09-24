@@ -25,27 +25,7 @@ lxc config device add rag-snap rag-snap-src disk \
   source="$HOME/src/rag-snap" \
   path=/root/rag-snap-src
 ```
-
-## AI-assisted contributions are welcome
-
-We actively welcome code written with the help of AI coding agents such as
-**[Claude Code](https://claude.com/claude-code)** and **[OpenCode](https://opencode.ai)**.
-This repository is set up for them: it ships an OpenSpec configuration
-(`openspec/config.yaml`), agent skills under `.claude/`, and an `.opencode/`
-configuration so the agent has the project context it needs.
-
-We only ask that you treat AI as an assistant, not an author of record:
-
-- **You are responsible for everything you submit.** Read, understand, and test
-  AI-generated code before opening a PR. "The model wrote it" is not a review.
-- **Disclose significant AI authorship.** Keep the agent's trailer on commits it
-  co-wrote, e.g. `Co-Authored-By: Claude <noreply@anthropic.com>`.
-- **Don't paste confidential data into third-party models.** Note that when
-  `rag-cli` itself is configured against a third-party inference API (e.g. AWS
-  Bedrock), prompts and retrieved context leave your machine — the same caution
-  applies to your development workflow.
-- The OpenSpec workflow below is the recommended way to drive an agent through a
-  non-trivial change.
+---
 
 ## Development setup
 
@@ -85,6 +65,30 @@ sudo snap install --dangerous ./rag-cli_*.snap
 > `snapctl get/set` outside a snap context. When your change touches config,
 > validate it from an installed snap, not just `make run`.
 
+---
+
+## AI-assisted contributions are welcome
+
+We actively welcome code written with the help of AI coding agents such as
+**[Claude Code](https://claude.com/claude-code)** and **[OpenCode](https://opencode.ai)**.
+This repository is set up for them: it ships an OpenSpec configuration
+(`openspec/config.yaml`), agent skills under `.claude/`, and an `.opencode/`
+configuration so the agent has the project context it needs.
+
+We only ask that you treat AI as an assistant, not an author of record:
+
+- **You are responsible for everything you submit.** Read, understand, and test
+  AI-generated code before opening a PR. "The model wrote it" is not a review.
+- **Disclose significant AI authorship.** Keep the agent's trailer on commits it
+  co-wrote, e.g. `Co-Authored-By: Claude <noreply@anthropic.com>`.
+- **Don't paste confidential data into third-party models.** Note that when
+  `rag-cli` itself is configured against a third-party inference API (e.g. AWS
+  Bedrock), prompts and retrieved context leave your machine — the same caution
+  applies to your development workflow.
+- The OpenSpec workflow below is the recommended way to drive an agent through a
+  non-trivial change.
+
+  
 ## The OpenSpec workflow
 
 For anything beyond a trivial fix, we use [OpenSpec](https://github.com/Fission-AI/OpenSpec/)
@@ -120,6 +124,8 @@ example, state which external services (OpenSearch / inference server / Tika) a
 change touches, and call out any new config keys and whether they are `package`
 or `user` scoped.
 
+---
+
 ## Pull requests
 
 - Branch off `main` and open a PR against `main`. Merging to `main` publishes
@@ -132,6 +138,7 @@ or `user` scoped.
   `feat:` / `fix:` prefix where it fits (see `git log`).
 - Preserve the fixed command order in `cmd/cli/main.go`
   (`cobra.EnableCommandSorting = false`) when adding commands.
+
 
 ## Questions
 
