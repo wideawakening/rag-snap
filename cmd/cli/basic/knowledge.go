@@ -3,7 +3,6 @@ package basic
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -377,6 +376,7 @@ func (cmd *knowledgeCommand) labelCommand() *cobra.Command {
 func (cmd *knowledgeCommand) ingestCommand() *cobra.Command {
 	var fileFlag string
 	var urlFlag string
+	var uriFlag string
 	var batchFlag string
 	var formatFlag string
 	var labelFlag string
@@ -387,6 +387,8 @@ func (cmd *knowledgeCommand) ingestCommand() *cobra.Command {
 		Short: "Ingest a document into the knowledge base",
 		Long: "Ingest a document into the knowledge base index with the given source ID.\n" +
 			"Provide the document via --file (local path) or --url (remote URL).\n" +
+			"Use --uri with --file to record the document's web link, which chat\n" +
+			"answers and search results cite (URL ingests record their URL automatically).\n" +
 			"Use --batch <config.yaml> to ingest multiple documents from a YAML file.\n" +
 			"Use --format rfp to ingest a CSV of previous RFP question/answer pairs\n" +
 			"(columns: question, answer, source), one chunk per row.",
@@ -431,6 +433,14 @@ func (cmd *knowledgeCommand) ingestCommand() *cobra.Command {
 			if fileFlag != "" && urlFlag != "" {
 				return fmt.Errorf("--file and --url are mutually exclusive")
 			}
+			if uriFlag != "" {
+				if fileFlag == "" {
+					return fmt.Errorf("--uri is only allowed with --file; --url records its URL automatically")
+				}
+				if !knowledge.IsHTTPURL(uriFlag) {
+					return fmt.Errorf("--uri %q must be an absolute http(s) URL", uriFlag)
+				}
+			}
 
 			// Daemon mode: hand the source to ragd, which crawls/extracts and
 			// indexes server-side as an async operation. The file upload is
@@ -441,7 +451,7 @@ func (cmd *knowledgeCommand) ingestCommand() *cobra.Command {
 				if urlFlag != "" {
 					opURL, err = dc.IngestURL(context.Background(), knowledgeBaseName, sourceID, urlFlag, labelFlag)
 				} else {
-					opURL, err = dc.IngestFile(context.Background(), knowledgeBaseName, sourceID, fileFlag, labelFlag)
+					opURL, err = dc.IngestFile(context.Background(), knowledgeBaseName, sourceID, fileFlag, uriFlag, labelFlag)
 				}
 				if err != nil {
 					return err
@@ -463,6 +473,7 @@ func (cmd *knowledgeCommand) ingestCommand() *cobra.Command {
 			// Resolve the file path
 			var filePath string
 			var metadataPath string // stored in SourceMetadata.FilePath
+			sourceURI := uriFlag    // stored in SourceMetadata.SourceURI
 			var webMeta *processing.WebMetadata
 			if urlFlag != "" {
 				crawled, wm, cleanup, err := processing.CrawlURL(urlFlag)
@@ -472,6 +483,7 @@ func (cmd *knowledgeCommand) ingestCommand() *cobra.Command {
 				defer cleanup()
 				filePath = crawled
 				metadataPath = urlFlag
+				sourceURI = urlFlag
 				webMeta = wm
 			} else {
 				filePath = fileFlag
@@ -514,6 +526,10 @@ func (cmd *knowledgeCommand) ingestCommand() *cobra.Command {
 			if err := client.EnsureLabelMapping(ctx, indexName); err != nil {
 				return fmt.Errorf("ensuring label mapping: %w", err)
 			}
+			// Likewise the metadata index may predate the source_uri mapping.
+			if err := client.CreateSourcesIndex(ctx); err != nil {
+				return fmt.Errorf("ensuring sources metadata index: %w", err)
+			}
 
 			// Build source metadata with status=processing
 			now := time.Now().UTC().Format(knowledge.DateFormat)
@@ -523,8 +539,9 @@ func (cmd *knowledgeCommand) ingestCommand() *cobra.Command {
 			}
 			meta := knowledge.SourceMetadata{
 				SourceID:      sourceID,
-				FileName:      filepath.Base(filePath),
+				FileName:      knowledge.OriginalFileName(metadataPath),
 				FilePath:      metadataPath,
+				SourceURI:     sourceURI,
 				Checksum:      result.Checksum,
 				IndexName:     indexName,
 				ChunkCount:    len(result.Chunks),
@@ -593,6 +610,7 @@ func (cmd *knowledgeCommand) ingestCommand() *cobra.Command {
 
 	cobraCmd.Flags().StringVarP(&fileFlag, "file", "f", "", "Local file path to ingest")
 	cobraCmd.Flags().StringVarP(&urlFlag, "url", "u", "", "URL to download and ingest")
+	cobraCmd.Flags().StringVar(&uriFlag, "uri", "", "Web link (http/https) recorded for a --file source and shown in citations")
 	cobraCmd.Flags().StringVarP(&batchFlag, "batch", "B", "", "YAML batch config file — ingest multiple documents at once")
 	cobraCmd.Flags().StringVar(&formatFlag, "format", "", "Input format: 'rfp' for a CSV of question,answer,source rows (default: auto-detect via Tika)")
 	cobraCmd.Flags().StringVarP(&labelFlag, "label", "l", "", "Knowledge label for this source (default: the base's default label)")
@@ -631,7 +649,7 @@ func (cmd *knowledgeCommand) searchCommand() *cobra.Command {
 				}
 				for i, hit := range hits {
 					fmt.Printf("\n--- Result %d (score: %.4f, base: %s) %s ---\n", i+1, hit.Score, hit.Base, knowledge.LabelTag(hit.Label))
-					fmt.Printf("  Source: %s\n", hit.SourceID)
+					fmt.Printf("  Source: %s\n", knowledge.SourceLine(hit.Citation.Label, hit.Citation.Href, hit.SourceID))
 					fmt.Printf("  Date:   %s\n", hit.CreatedAt)
 					content := hit.Content
 					if len(content) > 200 {
@@ -676,7 +694,7 @@ func (cmd *knowledgeCommand) searchCommand() *cobra.Command {
 
 			for i, hit := range results {
 				fmt.Printf("\n--- Result %d (score: %.4f, index: %s) %s ---\n", i+1, hit.Score, hit.Index, knowledge.LabelTag(hit.Label))
-				fmt.Printf("  Source: %s\n", hit.SourceID)
+				fmt.Printf("  Source: %s\n", knowledge.SourceLine(hit.Citation.Label, hit.Citation.Href, hit.SourceID))
 				fmt.Printf("  Date:   %s\n", hit.CreatedAt)
 				content := hit.Content
 				if len(content) > 200 {
