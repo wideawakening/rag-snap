@@ -15,6 +15,14 @@ func interactive() bool {
 	return term.IsTerminal(int(os.Stdout.Fd()))
 }
 
+// Interactive reports whether an operator can be asked a question: stdout is a terminal.
+// A decision that must never be defaulted — accepting a shortfall, for instance — fails
+// instead when this is false.
+func Interactive() bool { return interactive() }
+
+// StartProgressSpinner shows a spinner with prefix while work runs, and
+// returns the function that stops it. It is a no-op when stdout is not a
+// terminal.
 func StartProgressSpinner(prefix string) (stop func()) {
 	if !interactive() {
 		return func() {}

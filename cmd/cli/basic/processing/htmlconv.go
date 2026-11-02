@@ -71,6 +71,15 @@ func walkNode(buf *strings.Builder, n *html.Node) {
 			walkChildren(buf, n)
 			return
 
+		case "title":
+			// Tika gives formats without a title an empty <title>&#0;</title>;
+			// the NUL parses as U+FFFD and would otherwise become a junk chunk.
+			if title := strings.Trim(collapseWhitespace(nodeText(n)), " \uFFFD"); title != "" {
+				buf.WriteString(title)
+				buf.WriteString("\n\n")
+			}
+			return
+
 		case "thead", "tbody", "tfoot", "div", "span", "body", "html", "head":
 			// Transparent wrappers — just process children
 			walkChildren(buf, n)
@@ -196,7 +205,7 @@ func renderList(buf *strings.Builder, listNode *html.Node, ordered bool) {
 			text := strings.TrimSpace(nodeText(c))
 			text = strings.ReplaceAll(text, "\n", " ")
 			if ordered {
-				buf.WriteString(fmt.Sprintf("%d. %s\n", idx, text))
+				fmt.Fprintf(buf, "%d. %s\n", idx, text)
 				idx++
 			} else {
 				buf.WriteString("- " + text + "\n")
